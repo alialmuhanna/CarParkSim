@@ -52,8 +52,8 @@ public class CarTests {
 	public void setUp() throws Exception {
 		
 		smallCar = new Car("C1", VALID_ARRIVAL_TIME, true);
-		generalCar = new Car("C1", VALID_ARRIVAL_TIME, false);
-		motorCycle = new MotorCycle("MC1", VALID_ARRIVAL_TIME);
+		generalCar = new Car("C2", VALID_ARRIVAL_TIME, false);
+		
 		
 	}
 
@@ -350,6 +350,23 @@ public class CarTests {
 		assertTrue(smallCar.toString().contains(String.valueOf(VALID_ARRIVAL_TIME)));
 		assertTrue(smallCar.toString().contains(String.valueOf(VALID_EXIT_TIME)));
 		assertTrue(smallCar.toString().contains(String.valueOf(VALID_EXIT_TIME-VALID_ARRIVAL_TIME)));
+		assertTrue(smallCar.toString().contains(String.valueOf(VALID_PARKING_TIME)));
+		assertTrue(smallCar.toString().contains(String.valueOf(ACTUAL_DEPARTURE_TIME)));
+		assertTrue(smallCar.toString().contains("Car can use small car parking space"));
+	}
+	
+	@Test
+	public void testWasParked() throws VehicleException {
+		smallCar.enterParkedState(VALID_PARKING_TIME, VALID_DURATION_STAY);
+		smallCar.exitParkedState(ACTUAL_DEPARTURE_TIME);
+		assertTrue(smallCar.wasParked());
+	}
+	
+	@Test
+	public void testWasQueued() throws VehicleException {
+		smallCar.enterQueuedState();
+		smallCar.exitQueuedState(VALID_EXIT_TIME);
+		assert(smallCar.wasQueued());
 	}
 	
 }
