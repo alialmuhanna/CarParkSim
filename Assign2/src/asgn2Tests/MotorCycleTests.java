@@ -252,7 +252,7 @@ public class MotorCycleTests {
 	
 	@Test
 	public void testGetVehID() {
-		assertEquals(motorCycle.getVehID(), "C1");
+		assertEquals(motorCycle.getVehID(), "MC1");
 	}
 	
 	@Test
