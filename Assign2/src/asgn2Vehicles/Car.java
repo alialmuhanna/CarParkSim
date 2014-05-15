@@ -24,8 +24,6 @@ public class Car extends Vehicle {
 	
 	private boolean small; 
 	
-	private String vehID = "";
-	private int arrivalTime;
 
 	/**
 	 * The Car Constructor - small set at creation, not mutable. 
@@ -58,5 +56,18 @@ public class Car extends Vehicle {
 	 */
 	@Override
 	public String toString() {
+		StringBuilder result = new StringBuilder();
+		String NEW_LINE = "\n";
+		
+		if (this.isSmall()){
+			result.append(super.toString() + NEW_LINE);
+			result.append("Car can use small car parking space");
+		}
+		else {
+			result.append(super.toString() + NEW_LINE);
+			result.append("Car can not use small car parking space");
+		}
+		
+		return result.toString();
 	}
 }

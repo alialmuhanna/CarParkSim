@@ -50,6 +50,7 @@ public abstract class Vehicle extends Object {
 	private String vehicleState = "";
 	private int parkingTime = 0;
 	private int exitTime = 0;
+	private int queueTime = 0;
 	
 	/**
 	 * Vehicle Constructor 
@@ -60,14 +61,13 @@ public abstract class Vehicle extends Object {
 	 */
 	public Vehicle(String vehID,int arrivalTime) throws VehicleException  {
 		
-		if (this.arrivalTime != 0){
-			this.vehID = vehID;
-			this.arrivalTime = arrivalTime;
-			vehicleState = "N";
+		if (arrivalTime <= 0){
+			throw new VehicleException("arrival time is less than 0");
 		}
 		
 		else {
-			throw new VehicleException("arrival time is less than 0");
+			this.vehID = vehID;
+			this.arrivalTime = arrivalTime;
 		}
 		
 	}
@@ -82,17 +82,19 @@ public abstract class Vehicle extends Object {
 	 *         or if intendedDuration is less than the minimum prescribed in asgnSimulators.Constants
 	 */
 	public void enterParkedState(int parkingTime, int intendedDuration) throws VehicleException {
-		
-		if (vehicleState != "P" || vehicleState != "Q" && parkingTime > 0 && 
-				intendedDuration > Constants.MINIMUM_STAY){
-			this.parkingTime  = parkingTime;
-			departureTime = parkingTime + intendedDuration;
-			vehicleState = "P";
+
+		if (vehicleState == "P" || vehicleState == "Q" || parkingTime < 0 ||
+				intendedDuration < Constants.MINIMUM_STAY){
+			
+			throw new VehicleException("vehicle already parked or queued or"
+					+ "invalid parking time or invalid intended duration and "
+					+ "given");
 		}
 		
 		else {
-			throw new VehicleException("vehicle already parked or queued or"
-					+ "invalid parking time or invalid intended duration and given");
+			this.parkingTime  = parkingTime;
+			departureTime = parkingTime + intendedDuration;
+			vehicleState = "P";
 		}
 		
 	}
@@ -104,11 +106,11 @@ public abstract class Vehicle extends Object {
 	 */
 	public void enterQueuedState() throws VehicleException {
 		
-		if (vehicleState != "P" || vehicleState != "Q"){
-			vehicleState = "Q";
+		if (vehicleState == "P" || vehicleState == "Q"){
+			throw new VehicleException("vehicle is already queued or parked");
 		}
 		else {
-			throw new VehicleException("vehicle is already queued or parked");
+			vehicleState = "Q";
 		}
 		
 	}
@@ -121,12 +123,16 @@ public abstract class Vehicle extends Object {
 	 */
 	public void exitParkedState(int departureTime) throws VehicleException {
 		
-		if (departureTime > parkingTime){
-			vehicleState = "";
-		}
-		else {
+		if(vehicleState != "P" || vehicleState == "Q" || departureTime
+				< parkingTime) {
 			throw new VehicleException("departureTime < parkingTime");
 		}
+		
+		else {
+			this.departureTime = departureTime;
+			vehicleState = "";
+		}
+		
 		
 	}
 
@@ -139,15 +145,15 @@ public abstract class Vehicle extends Object {
 	 *  exitTime is not later than arrivalTime for this vehicle
 	 */
 	public void exitQueuedState(int exitTime) throws VehicleException {
-		
-		if (vehicleState != "P" || vehicleState == "Q" || 
-				exitTime > arrivalTime){
-			this.exitTime  = exitTime;
-			vehicleState = "";
-		}
-		else {
+
+		if ( vehicleState == "P" || vehicleState != "Q" || 
+				exitTime < arrivalTime){
 			throw new VehicleException("vehicle is parked or not queued, or "
 					+ "exit time is not later than arrival time");
+		}
+		else {
+			this.exitTime  = exitTime;
+			vehicleState = "";
 		}
 		
 	}
@@ -201,12 +207,7 @@ public abstract class Vehicle extends Object {
 	 */
 	public boolean isParked() {
 		
-		if (vehicleState == "P"){
-			return true;
-		}
-		else {
-			return false;
-		}
+		return vehicleState == "P";
 		
 	}
 
@@ -216,12 +217,7 @@ public abstract class Vehicle extends Object {
 	 */
 	public boolean isQueued() {
 		
-		if (vehicleState == "Q"){
-			return true;
-		}
-		else {
-			return false;
-		}
+		return vehicleState == "Q";
 		
 	}
 	
@@ -235,12 +231,15 @@ public abstract class Vehicle extends Object {
 		
 		boolean satisfied = false;
 		
-		if (vehicleState == "P"){
-			satisfied = true;
-		}
-		else if (exitTime > Constants.MAXIMUM_QUEUE_TIME){
+		if (!this.wasParked() || exitTime-arrivalTime > 
+		Constants.MAXIMUM_QUEUE_TIME){
 			satisfied = false;
 		}
+		
+		else {
+			satisfied = true;
+		}
+		
 		return satisfied;
 		
 	}
@@ -250,6 +249,40 @@ public abstract class Vehicle extends Object {
 	 */
 	@Override
 	public String toString() {
+
+		StringBuilder result = new StringBuilder();
+		String NEW_LINE = "\n";
+		
+		result.append("Vehicle vehID: " + vehID + NEW_LINE);
+		result.append("Arrival Time: " + arrivalTime + NEW_LINE);
+		
+		if (this.wasQueued()){
+			queueTime  = exitTime - arrivalTime;
+			result.append("Vehicle was queued" + NEW_LINE);
+			result.append("Exit from queue: " + exitTime + NEW_LINE);
+			result.append("Queue time: " + queueTime + NEW_LINE);
+		}
+		else {
+			result.append("Vehicle was not queued" + NEW_LINE);
+		}
+		
+		if (this.wasParked()){
+			result.append("Vehicle was parked" + NEW_LINE);
+			result.append("Entry to Car Park: " + parkingTime + NEW_LINE);
+			result.append("Parking Time: " + departureTime + NEW_LINE);
+		}
+		else {
+			result.append("Vehicle was not parked" + NEW_LINE);
+		}
+		
+		if (this.isSatisfied()){
+			result.append("Customer was satisfied" + NEW_LINE);
+		}
+		else {
+			result.append("Customer was not satisfied" + NEW_LINE);
+		}
+		
+		return result.toString();
 	}
 
 	/**
@@ -262,9 +295,8 @@ public abstract class Vehicle extends Object {
 		if (vehicleState == "P" || parkingTime > 0){
 			return true;
 		}
-		else {
-			return false;
-		}
+		
+		return false;
 		
 	}
 
@@ -277,9 +309,8 @@ public abstract class Vehicle extends Object {
 		if (exitTime > 0 || vehicleState == "Q"){
 			return true;
 		}
-		else {
-			return false;
-		}
+		
+		return false;
 		
 	}
 }

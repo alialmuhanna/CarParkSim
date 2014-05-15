@@ -41,6 +41,15 @@ import asgn2Vehicles.Vehicle;
 public class CarPark {
 
 	
+	private int maxCarSpaces = 0;
+	private int maxSmallCarSpaces = 0;
+	private int maxMotorCycleSpaces = 0;
+	private int maxQueueSize = 0;
+	
+	//Spaces
+	//Queue
+	//Archive
+
 	/**
 	 * CarPark constructor sets the basic size parameters. 
 	 * Uses default parameters
@@ -59,6 +68,12 @@ public class CarPark {
 	 * @param maxQueueSize maximum number of vehicles allowed to queue
 	 */
 	public CarPark(int maxCarSpaces,int maxSmallCarSpaces, int maxMotorCycleSpaces, int maxQueueSize) {
+		
+		this.maxCarSpaces  = maxCarSpaces;
+		this.maxSmallCarSpaces  = maxSmallCarSpaces;
+		this.maxMotorCycleSpaces  = maxMotorCycleSpaces;
+		this.maxQueueSize  = maxQueueSize;
+		
 	}
 
 	/**
@@ -70,6 +85,10 @@ public class CarPark {
 	 * @throws SimulationException if one or more departing vehicles are not in the car park when operation applied
 	 */
 	public void archiveDepartingVehicles(int time,boolean force) throws VehicleException, SimulationException {
+		
+		//if its time to go, its time to go, clear vehicle from carpark
+		//other CarPark methods here
+		
 	}
 		
 	/**
@@ -87,6 +106,15 @@ public class CarPark {
 	 * @throws VehicleException if one or more vehicles not in the correct state or if timing constraints are violated
 	 */
 	public void archiveQueueFailures(int time) throws VehicleException {
+		
+		//Concerned with archive and queue
+		//try catch
+		//check if empty, if not; keep looking at elements in the queue until we have exhausted those that stayed for too long:
+		//current time - arrival time > maximum queue time >>>> change state "exitQueuedState" >>>> may throw exception if its done in wrong time
+		//archive vehicle & change state
+		
+		//queues are in order, first in first out data structure
+		
 	}
 	
 	/**
@@ -285,6 +313,9 @@ public class CarPark {
 	 * @throws VehicleException if vehicle creation violates constraints 
 	 */
 	public void tryProcessNewVehicles(int time,Simulator sim) throws VehicleException, SimulationException {
+		
+		//try
+		
 	}
 
 	/**
