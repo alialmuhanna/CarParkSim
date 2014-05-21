@@ -442,14 +442,19 @@ public class CarPark {
 	public boolean spacesAvailable(Vehicle v) {
 
 		boolean available = true;
-
+		
+		//if vehicle is car
 		if (v instanceof Car) {
+			
+			//if vehicle is small
 			if (((Car) v).isSmall()) {
 				if (this.getNumSmallCars() == maxSmallCarSpaces
 						&& this.getNumCars() == maxCarSpaces) {
 					available = false;
 				}
 			}
+			
+			//vehicle is general car
 			else {
 				if (this.getNumCars() == maxCarSpaces){
 					available = false;
@@ -498,7 +503,14 @@ public class CarPark {
 			boolean small = sim.smallCarTrial();
 			
 			count += 1;
-			newVeh = new Car("C" + this.count, time, small);
+			
+			
+			if (small){
+				newVeh = new Car("S" + this.count, time, small);
+			}
+			else {
+				newVeh = new Car("C" + this.count, time, small);
+			}
 
 			if (this.spacesAvailable(newVeh)) {
 				int intendedDuration = sim.setDuration();
