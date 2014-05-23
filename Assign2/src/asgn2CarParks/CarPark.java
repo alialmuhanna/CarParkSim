@@ -48,9 +48,10 @@ public class CarPark {
 	private int maxQueueSize = 0;
 	private int carParkSize = 0;
 	private int count = 0;
-	private int smallParked = 0;
-	private int generalParked = 0;
-	private int motorCycleParked = 0;
+	private int numSmallCars = 0;
+	private int numCars = 0;
+	private int numMotorCycles = 0;
+	private int numDissatisfied = 0;
 
 	// Parked
 	private ArrayList<Vehicle> spaces ;
@@ -59,7 +60,10 @@ public class CarPark {
 	private ArrayList<Vehicle> queue;
 
 	// Archive
-	private ArrayList<Vehicle> archive;
+	private ArrayList<Vehicle> past;
+	
+	private String status;
+	
 
 	/**
 	 * CarPark constructor sets the basic size parameters. Uses default
@@ -99,7 +103,7 @@ public class CarPark {
 		
 		queue = new ArrayList<Vehicle>();
 		
-		archive = new ArrayList<Vehicle>();
+		past = new ArrayList<Vehicle>();
 
 	}
 
@@ -129,21 +133,23 @@ public class CarPark {
 		for (Vehicle veh : spaces) {
 			if (veh.getDepartureTime() == time && force == false) {
 				//this.unparkVehicle(veh, time);
-				archive.add(veh);
+				past.add(veh);
 			}
 			if (force == true) {
 				//this.unparkVehicle(veh, time);
-				archive.add(veh);
+				past.add(veh);
 				//spaces.clear();
 			}
 		}
 		
-		for (Vehicle veh : archive){
+		for (Vehicle veh : past){
 			if (veh.getDepartureTime() == time && force == false) {
 				this.unparkVehicle(veh, time);
+				status = this.setVehicleMsg(veh, "P", "A");
 			}
 			if (force == true) {
 				this.unparkVehicle(veh, time);
+				status = this.setVehicleMsg(veh, "P", "A");
 				spaces.clear();
 			}
 		}
@@ -168,7 +174,9 @@ public class CarPark {
 		}
 		
 		if (this.queueFull() || !this.spacesAvailable(v)){
-			archive.add(v);
+			past.add(v);
+			status = this.setVehicleMsg(v, "N", "A");
+			numDissatisfied += 1;
 		}
 		
 	}
@@ -198,13 +206,15 @@ public class CarPark {
 		for (Vehicle veh : queue) {
 			if (time - veh.getArrivalTime() > Constants.MAXIMUM_QUEUE_TIME) {
 				veh.exitQueuedState(time);
-				archive.add(veh);
+				status = this.setVehicleMsg(veh, "Q", "A");
+				past.add(veh);
 			}
 		}
 		
-		for (Vehicle veh : archive) {
+		for (Vehicle veh : past) {
 			if (time - veh.getArrivalTime() > Constants.MAXIMUM_QUEUE_TIME) {
 				queue.remove(veh);
+				numDissatisfied += 1;
 			}
 		}
 
@@ -253,6 +263,7 @@ public class CarPark {
 		// check that there is avail spaces
 		if (spaces.size() < carParkSize) {
 			v.enterQueuedState();
+			status = this.setVehicleMsg(v, "N", "Q");
 		}
 
 		queue.add(v);
@@ -283,6 +294,12 @@ public class CarPark {
 
 		// yes, remove from queue
 		v.exitQueuedState(exitTime);
+		if(this.spacesAvailable(v)){
+			status = this.setVehicleMsg(v, "Q", "P");
+		}
+		else {
+			status = this.setVehicleMsg(v, "Q", "A");
+		}
 		queue.remove(v);
 	}
 
@@ -307,7 +324,7 @@ public class CarPark {
 	 * @return number of cars in car park, including small cars
 	 */
 	public int getNumCars() {
-		return generalParked;
+		return numCars;
 	}
 
 	/**
@@ -317,7 +334,7 @@ public class CarPark {
 	 *         small car space
 	 */
 	public int getNumMotorCycles() {
-		return motorCycleParked;
+		return numMotorCycles;
 	}
 
 	/**
@@ -327,7 +344,7 @@ public class CarPark {
 	 *         small car space.
 	 */
 	public int getNumSmallCars() {
-		return smallParked;
+		return numSmallCars;
 	}
 
 	/**
@@ -419,14 +436,21 @@ public class CarPark {
 		v.enterParkedState(time, intendedDuration);
 		
 		if (v instanceof Car){
-			if(((Car) v).isSmall() && maxSmallCarSpaces != smallParked){
-				smallParked += 1;
+			if(((Car) v).isSmall() && maxSmallCarSpaces != numSmallCars){
+				numSmallCars += 1;
 			}
-			generalParked += 1;
+			numCars += 1;
 		}
 		
 		if (v instanceof MotorCycle){
-			motorCycleParked += 1;
+			numMotorCycles += 1;
+		}
+		
+		if (v.isQueued()){
+			status = this.setVehicleMsg(v, "Q", "P");
+		}
+		else {
+			status = this.setVehicleMsg(v, "N", "P");
 		}
 		
 		spaces.add(v);
@@ -503,7 +527,7 @@ public class CarPark {
 
 		if (v instanceof MotorCycle) {
 			if (this.getNumMotorCycles() == maxMotorCycleSpaces
-					&& this.smallParked == maxSmallCarSpaces) {
+					&& this.numSmallCars == maxSmallCarSpaces) {
 				available = false;
 			}
 		}
@@ -605,6 +629,7 @@ public class CarPark {
 		}
 
 		v.exitParkedState(departureTime);
+		status = this.setVehicleMsg(v, "P", "A");
 		spaces.remove(v);
 
 	}
