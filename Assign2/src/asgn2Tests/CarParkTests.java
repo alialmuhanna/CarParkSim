@@ -107,7 +107,7 @@ public class CarParkTests {
 		fillCarParkAndQueue();
 		cp1.archiveNewVehicle(car3);
 	}
-	
+
 	/**
 	 * 
 	 * @throws SimulationException
@@ -123,6 +123,7 @@ public class CarParkTests {
 
 	/**
 	 * Archive new vehicle because spaces and queue are full
+	 * 
 	 * @throws SimulationException
 	 * @throws VehicleException
 	 * @author Ali Almuhanna - 8965048
@@ -134,15 +135,19 @@ public class CarParkTests {
 		Vehicle car4 = new Car("C4", VALID_ARRIVAL_TIME, false);
 		cp1.archiveNewVehicle(car4);
 	}
+	
+	
 
 	/**
 	 * Test method for {@link asgn2CarParks.CarPark#archiveQueueFailures(int)}.
-	 * @throws VehicleException 
-	 * @throws SimulationException 
+	 * 
+	 * @throws VehicleException
+	 * @throws SimulationException
 	 * @author Ali Almuhanna - 8965048
 	 */
 	@Test
-	public void testArchiveQueueFailures() throws SimulationException, VehicleException {
+	public void testArchiveQueueFailures() throws SimulationException,
+			VehicleException {
 		fillCarParkAndQueue();
 		cp1.archiveQueueFailures(LARGE_TIME);
 		assertTrue(cp1.queueEmpty());
@@ -208,7 +213,8 @@ public class CarParkTests {
 	 */
 	@Test
 	public void testFinalState() {
-		fail("Not yet implemented"); // TODO
+		assertFalse(cp1.finalState(), true);
+		
 	}
 
 	/**
@@ -257,7 +263,7 @@ public class CarParkTests {
 	 */
 	@Test
 	public void testGetStatus() {
-		fail("Not yet implemented"); // TODO
+		assertEquals(cp1.getStatus(VALID_ARRIVAL_TIME), 1, 0);
 	}
 
 	/**
@@ -265,7 +271,7 @@ public class CarParkTests {
 	 */
 	@Test
 	public void testInitialState() {
-		fail("Not yet implemented"); // TODO
+		assertEquals(cp1.initialState(), 1);
 	}
 
 	/**
@@ -301,14 +307,19 @@ public class CarParkTests {
 	 * Test method for
 	 * {@link asgn2CarParks.CarPark#processQueue(int, asgn2Simulators.Simulator)}
 	 * .
+	 * @throws SimulationException 
+	 * @throws VehicleException 
 	 */
 	@Test
-	public void testProcessQueue() {
-		fail("Not yet implemented"); // TODO
+	public void testProcessQueue() throws VehicleException, SimulationException {
+		fillCarParkAndQueue();
+		cp1.processQueue(EXIT_TIME, sim);
+		assertTrue(cp1.queueEmpty());
 	}
 
 	/**
 	 * Test method for {@link asgn2CarParks.CarPark#queueEmpty()}.
+	 * 
 	 * @author Ali Almuhanna - 8965048
 	 */
 	@Test
@@ -332,6 +343,7 @@ public class CarParkTests {
 	/**
 	 * Test method for
 	 * {@link asgn2CarParks.CarPark#spacesAvailable(asgn2Vehicles.Vehicle)}.
+	 * 
 	 * @author Ali Almuhanna - 8965048
 	 */
 	@Test
@@ -357,10 +369,25 @@ public class CarParkTests {
 
 	/**
 	 * Test method for {@link asgn2CarParks.CarPark#toString()}.
+	 * 
+	 * @throws SimulationException
+	 * @throws VehicleException
 	 */
 	@Test
-	public void testToString() {
-		fail("Not yet implemented"); // TODO
+	public void testToString() throws VehicleException, SimulationException {
+
+		cp1.archiveDepartingVehicles(ACTUAL_DEPARTURE_TIME, true);
+		cp1.archiveNewVehicle(car3);
+		cp1.archiveQueueFailures(ACTUAL_DEPARTURE_TIME);
+
+		assertTrue(cp1.toString().contains(String.valueOf(VALID_ARRIVAL_TIME)));
+		assertTrue(cp1.toString().contains(
+				String.valueOf(ACTUAL_DEPARTURE_TIME)));
+		assertTrue(cp1.toString().contains(
+				String.valueOf(VALID_ARRIVAL_TIME - ACTUAL_DEPARTURE_TIME)));
+		assertTrue(cp1.toString().contains(String.valueOf(EXIT_TIME)));
+		//assertTrue(cp1.toString().contains(String.valueOf(LARGE_TIME)));
+		assertTrue(cp1.toString().contains("CarPark needs Vehicles"));
 	}
 
 	/**
@@ -379,7 +406,7 @@ public class CarParkTests {
 		cp1.tryProcessNewVehicles(VALID_ARRIVAL_TIME, sim);
 		assertEquals(cp1.getNumCars(), 1);
 	}
-	
+
 	/**
 	 * 
 	 * @throws VehicleException
